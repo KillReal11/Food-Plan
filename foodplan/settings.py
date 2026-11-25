@@ -15,8 +15,6 @@ DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
 
-# Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -24,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "recipes",
 ]
 
 MIDDLEWARE = [
@@ -56,9 +55,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "foodplan.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -67,8 +63,12 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
+AUTH_USER_MODEL = "recipes.User"
+
+AUTHENTICATION_BACKENDS = [
+    "recipes.backends.EmailOrUsernameBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -85,9 +85,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/6.1/topics/i18n/
 
 LANGUAGE_CODE = "ru-ru"
 
