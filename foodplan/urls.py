@@ -19,8 +19,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from recipes.views import index, personal_account, order, registration, auth, recipe_detail
 
+from recipes.views import auth, index, order, personal_account, recipe_detail, registration
 
 urlpatterns = [
     path("admin/", admin.site.urls),
