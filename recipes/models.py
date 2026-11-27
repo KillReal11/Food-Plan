@@ -215,6 +215,11 @@ class Subscription(models.Model):
     def is_active(self):
         return self.is_paid and self.expires_at > timezone.now()
 
+    @staticmethod
+    def calculate_price(meal_types, plan):
+        monthly_base = sum((m.price for m in meal_types), Decimal("0"))
+        return (monthly_base * plan.multiplier).quantize(Decimal("0.01"))
+
 
 class DailyMenu(models.Model):
     subscription = models.ForeignKey(
