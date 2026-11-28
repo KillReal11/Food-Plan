@@ -1,7 +1,4 @@
-import random
 import shutil
-from collections import defaultdict
-from datetime import timedelta
 from decimal import Decimal
 from pathlib import Path
 
@@ -59,13 +56,10 @@ class Command(BaseCommand):
         menu_types = self._create_menu_types()
         allergens = self._create_allergens()
         ingredients = self._create_ingredients(allergens)
-        recipes = self._create_recipes(meal_types, menu_types, ingredients)
         subscription_plans = self._create_subscription_plans()
         users = self._create_users()
-        subscriptions = self._create_subscriptions(
-            users, subscription_plans, meal_types, menu_types, allergens
-        )
-        self._create_daily_menus(subscriptions, recipes)
+        self._create_recipes(meal_types, menu_types, ingredients)
+        self._create_subscriptions(users, subscription_plans, meal_types, menu_types, allergens)
 
         self.stdout.write(self.style.SUCCESS("✅ Тестовые данные загружены"))
 
@@ -382,46 +376,3 @@ class Command(BaseCommand):
             )
         self.stdout.write(f"  Подписки: {len(result)}")
         return result
-
-    # ---------- Меню на день ----------
-
-    def _create_daily_menus(self, subscriptions_data, recipes):
-        today = timezone.now().date()
-        count = 0
-        recipe_allergen_map = defaultdict(set)
-        pairs = RecipeIngredient.objects.values_list("recipe_id", "ingredient__allergens__id")
-        for recipe_id, allergen_id in pairs:
-            if allergen_id is not None:
-                recipe_allergen_map[recipe_id].add(allergen_id)
-
-        for sub_data in subscriptions_data:
-            sub = sub_data["subscription"]
-            meal_types = sub_data["meal_types"]
-            menu_type = sub_data["menu_type"]
-            excluded = {a.id for a in sub_data["allergens"]}
-
-            for offset in range(7):
-                date = today + timedelta(days=offset)
-                daily_menu, created = DailyMenu.objects.get_or_create(
-                    subscription=sub,
-                    date=date,
-                )
-                if not created:
-                    continue
-
-                chosen = []
-                for meal in meal_types:
-                    suitable_recipes = [
-                        r
-                        for r in recipes
-                        if r.meal_type_id == meal.id
-                        and r.menu_type_id == menu_type.id
-                        and not (recipe_allergen_map[r.id] & excluded)
-                    ]
-                    if suitable_recipes:
-                        chosen.append(random.choice(suitable_recipes))
-
-                daily_menu.recipes.set(chosen)
-                count += 1
-
-        self.stdout.write(f"  Меню на день: {count}")
