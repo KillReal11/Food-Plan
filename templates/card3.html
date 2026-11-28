@@ -8,7 +8,7 @@
                 <a class="navbar-brand" href="{% url 'home' %}">
                     <img src="{% static 'img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="">
                 </a>
-                <button class="btn btn-outline-success me-2 shadow-none foodplan_green foodplan__border_green">Назад</button>
+                <button type="button" onclick="history.back()" class="btn btn-outline-success me-2 shadow-none foodplan_green foodplan__border_green">Назад</button>
             </div>
         </nav>
     </header>
@@ -17,38 +17,47 @@
     <main style="margin-top: calc(2rem + 75px);">
         <section>
             <div class="container">
-                <div class="row">
-                    <div class="col-12 col-md-4 d-flex justify-content-center">
-                        <div class="card foodplan__card_borderless">
-                            <img src="{% static 'img/circle1.png' %}" alt="">
-                        </div>
+                {% if not subscription %}
+                    <div class="alert alert-warning mt-4" role="alert">
+                        <h4 class="alert-heading">У вас нет активной подписки</h4>
+                        <p>Чтобы получать меню на день, оформите подписку.</p>
+                        <a href="#" class="btn foodplan_green foodplan__border_green">Выбрать тариф</a>
                     </div>
-                    <div class="col-12 col-md-8 d-flex flex-column justify-content-between">
-                        <div class="row">
-                            <h2>Название рецепта</h2>
-                            <div class="col-12 col-sm-6">
-                                <h6>Рецепт рецепт Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi eius nemo voluptatum minus
-                                    facilis blanditiis ut architecto rem maiores, aperiam aut debitis repellat quod voluptates natus, laboriosam hic
-                                    adipisci non. Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi eius nemo voluptatum minus
-                                    facilis blanditiis ut architecto rem maiores, aperiam aut debitis repellat quod voluptates natus, laboriosam hic
-                                    adipisci non. Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi eius nemo voluptatum minus
-                                    facilis blanditiis ut architecto rem maiores, aperiam aut debitis repellat quod voluptates natus, laboriosam hic
-                                    adipisci non.</h6>
+                {% else %}
+                    <h2>{{ daily_menu.date|date:"l d.m.Y" }}</h2> 
+                    <p class="text-muted" style="margin-bottom: 2rem;">Количество персон: {{ persons_count }}</p>
+                    {% for item in recipes_data %}
+                        <div class="row" style="margin-bottom: 1rem;">
+                            <div class="col-12 col-md-4 d-flex justify-content-center">
+                                <div class="card foodplan__card_borderless">
+                                    {% if item.recipe.image %}
+                                        <img src="{{ item.recipe.image.url }}" alt="{{ item.recipe.title }}">
+                                    {% else %}
+                                        <img src="{% static 'img/circle1.png' %}" alt="">
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <small class="link-secondary">Ингредиенты:</small>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item disabled"><small>ингредиент (500г.)</small></li>
-                                    <li class="list-group-item disabled"><small>ингредиент (500г.)</small></li>
-                                    <li class="list-group-item disabled"><small>ингредиент (500г.)</small></li>
-                                    <li class="list-group-item disabled"><small>ингредиент (500г.)</small></li>
-                                    <li class="list-group-item disabled"><small>ингредиент (500г.)</small></li>
-                                </ul>
-                                <small class="link-secondary">Общая калорийность: 1000 ккал</small>
+                            <div class="col-12 col-md-8 d-flex flex-column justify-content-between">
+                                <div class="row">
+                                    <h2>{{ item.recipe.title }}</h2>
+                                    <div class="col-12 col-sm-6">
+                                        <p class="foodplan_green">{{ item.recipe.meal_type.name }}</p>
+                                        <h6>{{ item.recipe.instruction }}</h6>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <small class="link-secondary">Ингредиенты:</small>
+                                        <ul class="list-group list-group-flush">
+                                            {% for ingredient in item.ingredients %}
+                                                <li class="list-group-item disabled"><small>{{ ingredient.name }} ({{ ingredient.quantity|floatformat:0 }} г.)</small></li>
+                                            {% endfor %}
+                                        </ul>
+                                        <small class="link-secondary">Общая калорийность: {{ item.total_calories|floatformat:0 }} ккал</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         </section>
     </main>

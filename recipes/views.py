@@ -3,10 +3,12 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import MAX_PERSONS, LoginForm, OrderForm, RegistrationForm
-from .services import create_subscription
+from .models import Subscription
+from .services import create_subscription, get_or_create_daily_menu
 
 MENU_IMAGES = {
     "classic": "img/menu_classical.png",
@@ -149,5 +151,36 @@ def index(request):
     return render(request, "index.html")
 
 
-def recipe_detail(request):
-    return render(request, "card3.html")
+@login_required
+def today_menu(request):
+    subscription = Subscription.objects.for_user(request.user).active().first()
+
+    if not subscription:
+        return render(request, "card3.html", {"subscription": None})
+
+    today = timezone.now().date()
+    daily_menu = get_or_create_daily_menu(subscription, today).first()
+
+    persons_count = subscription.persons_count
+
+    recipes_data = [
+        {
+            "recipe": recipe,
+            "ingredients": recipe.ingredients_for_persons(persons_count),
+            "total_calories": recipe.total_calories,
+        }
+        for recipe in daily_menu.recipes.all()
+    ]
+
+    recipes_data.sort(key=lambda item: item["recipe"].meal_type.order)
+
+    return render(
+        request,
+        "card3.html",
+        {
+            "subscription": subscription,
+            "daily_menu": daily_menu,
+            "recipes_data": recipes_data,
+            "persons_count": persons_count,
+        },
+    )
