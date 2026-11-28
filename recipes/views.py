@@ -6,10 +6,8 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from recipes.models import Recipe
-
 from .forms import MAX_PERSONS, LoginForm, OrderForm, RegistrationForm
-from .models import Subscription
+from .models import Recipe, Subscription
 from .services import create_subscription, get_or_create_daily_menu
 
 MENU_IMAGES = {

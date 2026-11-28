@@ -47,7 +47,7 @@ def get_or_create_daily_menu(subscription, date):
 
 
 def _choose_recipes(daily_menu, subscription):
-    meal_types = list(subscription.meal_types.order_by('order'))
+    meal_types = list(subscription.meal_types.order_by("order"))
     excluded = list(subscription.allergy_to.values_list("id", flat=True))
 
     chosen = []
