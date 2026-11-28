@@ -92,6 +92,16 @@ class Recipe(models.Model):
     def total_calories(self):
         return sum((ri.get_calories() for ri in self.recipe_ingredients.all()), Decimal("0"))
 
+    def ingredients_for_persons(self, persons_count):
+        return [
+            {
+                "name": ri.ingredient.name,
+                "quantity": ri.quantity * persons_count,
+                "calories": ri.get_calories(),
+            }
+            for ri in self.recipe_ingredients.all()
+        ]
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
@@ -181,6 +191,14 @@ class SubscriptionPlan(models.Model):
         return self.name
 
 
+class SubscriptionQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(is_paid=True, expires_at__gt=timezone.now())
+
+    def for_user(self, user):
+        return self.filter(user=user).order_by("-started_at")
+
+
 class Subscription(models.Model):
     user = models.ForeignKey(
         User, verbose_name="пользователь", on_delete=models.CASCADE, related_name="subscriptions"
@@ -205,6 +223,8 @@ class Subscription(models.Model):
     )
     is_paid = models.BooleanField("оплачено", default=False)
 
+    objects = SubscriptionQuerySet.as_manager()
+
     class Meta:
         verbose_name = "подписка"
         verbose_name_plural = "подписки"
@@ -222,12 +242,25 @@ class Subscription(models.Model):
         return (monthly_base * plan.multiplier).quantize(Decimal("0.01"))
 
 
+class DailyMenuQuerySet(models.QuerySet):
+    def for_subscription(self, subscription, date):
+        return self.filter(subscription=subscription, date=date)
+
+    def with_recipes(self):
+        return self.prefetch_related(
+            "recipes__meal_type",
+            "recipes__recipe_ingredients__ingredient",
+        )
+
+
 class DailyMenu(models.Model):
     subscription = models.ForeignKey(
         Subscription, verbose_name="подписка", on_delete=models.CASCADE, related_name="daily_menus"
     )
     date = models.DateField("дата")
     recipes = models.ManyToManyField(Recipe, verbose_name="рецепты", related_name="daily_menus")
+
+    objects = DailyMenuQuerySet.as_manager()
 
     class Meta:
         verbose_name = "меню на день"

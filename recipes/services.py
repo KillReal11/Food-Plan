@@ -1,9 +1,10 @@
 import calendar
+import random
 
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Subscription
+from .models import DailyMenu, Recipe, Subscription
 
 
 def add_months(value, months):
@@ -31,3 +32,32 @@ def create_subscription(user, *, plan, menu_type, meal_types, persons_count, all
     subscription.meal_types.set(meal_types)
     subscription.allergy_to.set(allergens)
     return subscription
+
+
+def get_or_create_daily_menu(subscription, date):
+    menu, created = DailyMenu.objects.get_or_create(
+        subscription=subscription,
+        date=date,
+    )
+
+    if created:
+        _choose_recipes(menu, subscription)
+
+    return DailyMenu.objects.for_subscription(subscription, date).with_recipes()
+
+
+def _choose_recipes(daily_menu, subscription):
+    meal_types = list(subscription.meal_types.order_by("order"))
+    excluded = list(subscription.allergy_to.values_list("id", flat=True))
+
+    chosen = []
+    for meal in meal_types:
+        suitable_recipes = list(
+            Recipe.objects.filter(meal_type=meal, menu_type=subscription.menu_type)
+            .exclude(recipe_ingredients__ingredient__allergens__id__in=excluded)
+            .distinct()
+        )
+        if suitable_recipes:
+            chosen.append(random.choice(suitable_recipes))
+
+    daily_menu.recipes.set(chosen)
