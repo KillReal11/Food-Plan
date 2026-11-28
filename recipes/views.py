@@ -5,6 +5,8 @@ from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from recipes.models import Recipe
+
 from .forms import MAX_PERSONS, LoginForm, OrderForm, RegistrationForm
 from .services import create_subscription
 
@@ -15,6 +17,11 @@ MENU_IMAGES = {
     "keto": "img/menu_keto.png",
 }
 DEFAULT_MENU_IMAGE = "img/menu_classical.png"
+
+
+def home(request):
+    recipes = Recipe.objects.select_related("meal_type").order_by("?")[:5]
+    return render(request, "index.html", {"recipes": recipes})
 
 
 def _safe_next_url(request):
