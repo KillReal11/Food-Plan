@@ -8,7 +8,7 @@
                 <a class="navbar-brand" href="{% url 'home' %}">
                     <img src="{% static 'img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="">
                 </a>
-                <h3 class="text-secondary mt-2 me-2">Стоимость: 00000₽</h3>
+                <h3 class="text-secondary mt-2 me-2">Стоимость: <span id="order-total-top">&mdash;</span></h3>
                 <button form="order" type="submit" class="btn shadow-none btn-sm btn-outline-success foodplan_green foodplan__border_green">Оплатить</button>
             </div>
         </nav>
@@ -20,143 +20,69 @@
             <div class="container">
                 <h1><strong class="foodplan_green">1 шаг </strong>до первого меню</h1>
                 <h5 class="text-secondary mb-3">Вам будет доступно 4 типа меню: Классическое, Низкоуглеводное, Вегетарианское и Кето.</h5>
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field, errors in form.errors.items %}{% for error in errors %}<div>{{ error }}</div>{% endfor %}{% endfor %}
+                </div>
+                {% endif %}
                 <div class="row mb-5">
+                    {% for item in menu_types %}
                     <div class="col-6 col-md-3">
-                        
-                        <label for="classic" class="position-relative" style="cursor: pointer;">
-                            <img src="{% static 'img/menu_classical.png' %}" alt="" class="w-100">
-                            <input form="order" type="radio" name="foodtype" id="classic" value="classic" class="foodplan_selected d-none">
-                            <div class="img_selected" id="img1"></div>
+                        <label for="menu-{{ item.obj.slug }}" class="position-relative" style="cursor: pointer;">
+                            <img src="{% static item.image %}" alt="{{ item.obj.name }}" class="w-100">
+                            <input form="order" type="radio" name="menu_type" id="menu-{{ item.obj.slug }}" value="{{ item.obj.slug }}" class="foodplan_selected d-none"{% if item.obj.slug == selected_menu %} checked{% endif %}>
+                            <div class="img_selected" id="img{{ item.number }}"></div>
                         </label>
                     </div>
-                    <div class="col-6 col-md-3">
-                        
-                        <label for="low" class="position-relative" style="cursor: pointer;">
-                            <img src="{% static 'img/menu_nizkougl.png' %}" alt="" class="w-100">
-                            <input form="order" type="radio" name="foodtype" id="low" value="low" class="foodplan_selected d-none">
-                            <div class="img_selected" id="img2"></div>
-                        </label>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        
-                        <label for="veg" class="position-relative" style="cursor: pointer;">
-                            <img src="{% static 'img/menu_veg.png' %}" alt="" class="w-100">
-                            <input form="order" type="radio" name="foodtype" id="veg" value="veg" class="foodplan_selected d-none">
-                            <div class="img_selected" id="img3"></div>
-                        </label>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        
-                        <label for="keto" class="position-relative" style="cursor: pointer;">
-                            <img src="{% static 'img/menu_keto.png' %}" alt="" class="w-100">
-                            <input form="order" type="radio" name="foodtype" id="keto" value="keto" class="foodplan_selected d-none">
-                            <div class="img_selected" id="img4"></div>
-                        </label>
-                    </div>
+                    {% endfor %}
                 </div>
                 <h2><strong>Выберите подходящий тариф</strong></h2>
-                <form id="order">
+                <form id="order" method="post">
+                {% csrf_token %}
                 <table class="table text-center text-truncate mb-5">
                     <tbody>
                         <tr>
                             <th scope="row" class="text-start">Срок</th>
                             <td>
-                                <select class="form-select">
-                                    <option value="0" selected>1 мес.</option>
-                                    <option value="1">3 мес.</option>
-                                    <option value="2">6 мес.</option>
-                                    <option value="3">12 мес.</option>
+                                <select name="plan" class="form-select">
+                                    {% for plan in plans %}
+                                    <option value="{{ plan.pk }}"{% if plan.pk|stringformat:"s" == selected_plan %} selected{% endif %}>{{ plan.name }}</option>
+                                    {% endfor %}
                                 </select>
                             </td>
                         </tr>
+                        {% for row in meal_rows %}
                         <tr>
-                            <th scope="row" class="text-start">Завтраки</th>
+                            <th scope="row" class="text-start">{{ row.meal.name }}</th>
                             <td>
-                                <select name="select1" class="form-select">
-                                    <option value="0" selected>&#10004;</option>
-                                    <option value="1">&#10008;</option>
+                                <select name="meal_{{ row.meal.pk }}" class="form-select">
+                                    <option value="1"{% if row.checked %} selected{% endif %}>&#10004;</option>
+                                    <option value="0"{% if not row.checked %} selected{% endif %}>&#10008;</option>
                                 </select>
                             </td>
                         </tr>
-                        <tr>
-                            <th scope="row" class="text-start">Обеды</th>
-                            <td>
-                                <select name="select2" class="form-select">
-                                    <option value="0" selected>&#10004;</option>
-                                    <option value="1">&#10008;</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="text-start">Ужины</th>
-                            <td>
-                                <select name="select3" class="form-select">
-                                    <option value="0" selected>&#10004;</option>
-                                    <option value="1">&#10008;</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="text-start">Десерты</th>
-                            <td>
-                                <select name="select4" class="form-select">
-                                    <option value="0" selected>&#10004;</option>
-                                    <option value="1">&#10008;</option>
-                                </select>
-                            </td>
-                        </tr>
+                        {% endfor %}
                         <tr>
                             <th scope="row" class="text-start">Кол-во персон</th>
                             <td>
-                                <select name="select5" class="form-select">
-                                    <option value="0" selected>1</option>
-                                    <option value="1">2</option>
-                                    <option value="2">3</option>
-                                    <option value="3">4</option>
-                                    <option value="4">5</option>
-                                    <option value="5">6</option>
+                                <select name="persons_count" class="form-select">
+                                    {% for number in persons_range %}
+                                    <option value="{{ number }}"{% if number|stringformat:"s" == selected_persons %} selected{% endif %}>{{ number }}</option>
+                                    {% endfor %}
                                 </select>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row" class="text-start">Аллергии</th>
                             <td>
+                                {% for allergen in allergens %}
                                 <div class="form-check d-flex justify-content-start">
-                                    <input class="form-check-input me-1 foodplan_checked-green" type="checkbox" value="" name="allergy1">
-                                    <label class="form-check-label" for="allergy1">
-                                        Рыба и морепродукты
+                                    <input class="form-check-input me-1 foodplan_checked-green" type="checkbox" value="{{ allergen.pk }}" name="allergies" id="allergy-{{ allergen.pk }}"{% if allergen.pk|stringformat:"s" in selected_allergies %} checked{% endif %}>
+                                    <label class="form-check-label" for="allergy-{{ allergen.pk }}">
+                                        {{ allergen.name }}
                                     </label>
                                 </div>
-                                <div class="form-check d-flex justify-content-start">
-                                    <input class="form-check-input me-1 foodplan_checked-green" type="checkbox" value="" name="allergy2">
-                                    <label class="form-check-label" for="allergy2">
-                                        Мясо
-                                    </label>
-                                </div>
-                                <div class="form-check d-flex justify-content-start">
-                                    <input class="form-check-input me-1 foodplan_checked-green" type="checkbox" value="" name="allergy3">
-                                    <label class="form-check-label" for="allergy3">
-                                        Зерновые
-                                    </label>
-                                </div>
-                                <div class="form-check d-flex justify-content-start">
-                                    <input class="form-check-input me-1 foodplan_checked-green" type="checkbox" value="" name="allergy3">
-                                    <label class="form-check-label" for="allergy3">
-                                        Продукты пчеловодства
-                                    </label>
-                                </div>
-                                <div class="form-check d-flex justify-content-start">
-                                    <input class="form-check-input me-1 foodplan_checked-green" type="checkbox" value="" name="allergy3">
-                                    <label class="form-check-label" for="allergy3">
-                                        Орехи и бобовые
-                                    </label>
-                                </div>
-                                <div class="form-check d-flex justify-content-start">
-                                    <input class="form-check-input me-1 foodplan_checked-green" type="checkbox" value="" name="allergy3">
-                                    <label class="form-check-label" for="allergy3">
-                                        Молочные продукты
-                                    </label>
-                                </div>
+                                {% endfor %}
                             </td>
                         </tr>
                     </tbody>
@@ -169,12 +95,46 @@
                     <input type="password" class="form-control me-2" id="password">
                     <button type="submit" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Применить</button>
                 </form>
+                <div class="text-center mt-5">
+                    <h4>Стоимость: <strong class="foodplan_green" id="order-total">&mdash;</strong></h4>
+                    {% if not user.is_authenticated %}
+                    <p class="text-secondary mb-0">Чтобы оформить подписку, нужно войти в аккаунт</p>
+                    {% endif %}
+                </div>
                 <div class="d-flex justify-content-center my-5">
                     <button form="order" type="submit" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green w-50">Оплатить</button>
                 </div>
             </div>
         </section>
     </main>
+    {{ pricing|json_script:"pricing-data" }}
+    <script>
+        (function () {
+            var data = JSON.parse(document.getElementById("pricing-data").textContent);
+            var form = document.getElementById("order");
+            var outputs = [
+                document.getElementById("order-total"),
+                document.getElementById("order-total-top")
+            ];
+
+            function update() {
+                var plan = data.plans[form.elements["plan"].value];
+                var text = "\u2014";
+                if (plan) {
+                    var monthly = 0;
+                    Object.keys(data.meals).forEach(function (id) {
+                        var field = form.elements["meal_" + id];
+                        if (field && field.value === "1") { monthly += parseFloat(data.meals[id]); }
+                    });
+                    text = Math.round(monthly * parseFloat(plan.multiplier)).toLocaleString("ru-RU") + " \u20bd";
+                }
+                outputs.forEach(function (el) { el.textContent = text; });
+            }
+
+            form.addEventListener("change", update);
+            update();
+        })();
+    </script>
 {% endblock %}
 {% block footer %}
 {% endblock %}

@@ -15,6 +15,11 @@
 {% endblock %}
 {% block content %}
     <main style="margin-top: calc(2rem + 85px);">
+        {% if messages %}
+        <div class="container">
+            {% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}
+        </div>
+        {% endif %}
         <section>
             <div class="container">
                 <div class="row">
