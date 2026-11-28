@@ -3,8 +3,8 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect, render
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import MAX_PERSONS, LoginForm, OrderForm, ProfileForm, RegistrationForm
 from .services import create_subscription
