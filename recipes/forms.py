@@ -62,3 +62,16 @@ class LoginForm(forms.Form):
                 raise ValidationError("Неверный email или пароль.")
             self.user = user
         return cleaned
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'email']
+
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("Пользователь с таким email уже зарегистрирован.")
+        return email
