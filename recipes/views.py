@@ -1,8 +1,13 @@
 from django.shortcuts import render
 
+from recipes.models import Recipe
 
-def index(request):
-    return render(request, "index.html")
+
+
+
+def home(request):
+    recipes = Recipe.objects.select_related("meal_type").order_by("?")[:5]
+    return render(request, "index.html", {"recipes": recipes})
 
 
 def auth(request):
