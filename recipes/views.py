@@ -5,7 +5,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from .forms import MAX_PERSONS, LoginForm, RegistrationForm, OrderForm
+from .forms import MAX_PERSONS, LoginForm, OrderForm, RegistrationForm
 from .services import create_subscription
 
 MENU_IMAGES = {

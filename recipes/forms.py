@@ -105,7 +105,9 @@ class OrderForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["menu_type"].queryset = MenuType.objects.filter(slug__isnull=False).order_by("pk")
+        self.fields["menu_type"].queryset = MenuType.objects.filter(slug__isnull=False).order_by(
+            "pk"
+        )
         self.fields["plan"].queryset = SubscriptionPlan.objects.filter(is_active=True).order_by(
             "duration_months"
         )
