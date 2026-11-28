@@ -57,11 +57,9 @@ def lk_view(request):
             return redirect("lk")
     else:
         profile_form = ProfileForm(instance=user)
-    subscriptions = user.subscriptions.filter(
-        is_paid=True, expires_at__gt=timezone.now())
+    subscriptions = user.subscriptions.filter(is_paid=True, expires_at__gt=timezone.now())
     for subscription in subscriptions:
-        daily_menu = subscription.daily_menus.filter(
-            date=timezone.localdate()).first()
+        daily_menu = subscription.daily_menus.filter(date=timezone.localdate()).first()
         total_calories = 0
         if daily_menu:
             recipes = daily_menu.recipes.all()
@@ -69,9 +67,9 @@ def lk_view(request):
                 total_calories += recipe.total_calories
         subscription.daily_calories = total_calories
     context = {
-        'user': user,
-        'subscriptions': subscriptions,
-        'profile_form': profile_form,
+        "user": user,
+        "subscriptions": subscriptions,
+        "profile_form": profile_form,
     }
 
     return render(request, "lk.html", context)
