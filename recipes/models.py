@@ -24,6 +24,7 @@ class MealType(models.Model):
 
 class MenuType(models.Model):
     name = models.CharField("название", max_length=100, unique=True)
+    slug = models.SlugField("код", max_length=50, unique=True, null=True, blank=True)
 
     class Meta:
         verbose_name = "тип меню"
@@ -202,7 +203,7 @@ class Subscription(models.Model):
     price = models.DecimalField(
         "цена на момент покупки", max_digits=10, decimal_places=2, default=0
     )
-    is_paid = models.BooleanField("оплачено", default=True)
+    is_paid = models.BooleanField("оплачено", default=False)
 
     class Meta:
         verbose_name = "подписка"

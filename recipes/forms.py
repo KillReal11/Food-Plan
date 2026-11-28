@@ -3,7 +3,11 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
+from .models import Allergen, MealType, MenuType, SubscriptionPlan
+
 User = get_user_model()
+
+MAX_PERSONS = 6
 
 
 class RegistrationForm(forms.Form):
@@ -61,4 +65,60 @@ class LoginForm(forms.Form):
             if user is None:
                 raise ValidationError("Неверный email или пароль.")
             self.user = user
+        return cleaned
+
+
+class OrderForm(forms.Form):
+    menu_type = forms.ModelChoiceField(
+        queryset=MenuType.objects.none(),
+        to_field_name="slug",
+        error_messages={
+            "required": "Выберите тип меню.",
+            "invalid_choice": "Выберите тип меню из списка.",
+        },
+    )
+    plan = forms.ModelChoiceField(
+        queryset=SubscriptionPlan.objects.none(),
+        error_messages={
+            "required": "Выберите срок подписки.",
+            "invalid_choice": "Выберите срок подписки из списка.",
+        },
+    )
+    persons_count = forms.IntegerField(
+        min_value=1,
+        max_value=MAX_PERSONS,
+        error_messages={
+            "required": "Укажите количество персон.",
+            "invalid": "Количество персон должно быть числом.",
+            "min_value": "Минимум одна персона.",
+            "max_value": f"Максимум {MAX_PERSONS} персон.",
+        },
+    )
+    allergies = forms.ModelMultipleChoiceField(
+        queryset=Allergen.objects.order_by("pk"),
+        required=False,
+        error_messages={
+            "invalid_choice": "Выберите аллергены из списка.",
+            "invalid_pk_value": "Выберите аллергены из списка.",
+        },
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["menu_type"].queryset = MenuType.objects.filter(slug__isnull=False).order_by(
+            "pk"
+        )
+        self.fields["plan"].queryset = SubscriptionPlan.objects.filter(is_active=True).order_by(
+            "duration_months"
+        )
+        self.meals = list(MealType.objects.all())
+        for meal in self.meals:
+            self.fields[f"meal_{meal.pk}"] = forms.BooleanField(required=False)
+        self.selected_meals = []
+
+    def clean(self):
+        cleaned = super().clean()
+        self.selected_meals = [meal for meal in self.meals if cleaned.get(f"meal_{meal.pk}")]
+        if not self.selected_meals:
+            raise ValidationError("Выберите хотя бы один приём пищи.")
         return cleaned

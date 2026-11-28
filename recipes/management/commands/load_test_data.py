@@ -87,10 +87,18 @@ class Command(BaseCommand):
         return result
 
     def _create_menu_types(self):
-        names = ["Классическое", "Низкоуглеводное", "Вегетарианское", "Кето"]
+        data = [
+            ("Классическое", "classic"),
+            ("Низкоуглеводное", "low"),
+            ("Вегетарианское", "veg"),
+            ("Кето", "keto"),
+        ]
         result = {}
-        for name in names:
-            obj, _ = MenuType.objects.get_or_create(name=name)
+        for name, slug in data:
+            obj, _ = MenuType.objects.get_or_create(name=name, defaults={"slug": slug})
+            if not obj.slug:
+                obj.slug = slug
+                obj.save(update_fields=["slug"])
             result[name] = obj
         self.stdout.write(f"  Типы меню: {len(result)}")
         return result

@@ -57,7 +57,7 @@ class MealTypeAdmin(admin.ModelAdmin):
 
 @admin.register(MenuType)
 class MenuTypeAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "slug")
     search_fields = ("name",)
 
 
