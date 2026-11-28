@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from recipes.models import Recipe
+
 from .forms import MAX_PERSONS, LoginForm, OrderForm, RegistrationForm
 from .services import create_subscription
 
