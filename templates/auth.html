@@ -5,7 +5,7 @@
     <header>
         <nav class="navbar navbar-expand-md navbar-light fixed-top navbar__opacity">
             <div class="container">
-                <a class="navbar-brand" href="{% url 'index' %}">
+                <a class="navbar-brand" href="{% url 'home' %}">
                     <img src="{% static 'img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse1"
@@ -30,7 +30,7 @@
         <section>
             <div class="container">
                 <div class="card p-3 mb-5 foodplan__shadow">
-                    <a href="#" class="link-secondary fw-light foodplan__backButton">
+                    <a href="{% url 'home' %}" class="link-secondary fw-light foodplan__backButton">
                         <svg xmlns="http://www.w3.org/2000/svg" width="9%" height="9%" fill="currentColor" class="bi bi-arrow-left-circle"
                             viewBox="0 0 16 16">
                             <path fill-rule="evenodd"
@@ -40,18 +40,21 @@
                     <h2 class="text-center"><strong>Авторизация</strong></h2>
                 </div>
                 <div class="card px-5 py-3 d-flex align-items-center foodplan__shadow">
-                    <form>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next }}">
                         <h1 class="mb-4 text-center"><strong>Вход</strong></h1>
+                        {% if form.non_field_errors %}<div class="alert alert-danger py-2">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>{% endif %}
                         <div class="mb-3">
                             <label for="exampleInputEmail1" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" aria-describedby="emailHelp">
+                            <input type="email" class="form-control" id="email" name="email" value="{{ form.email.value|default:'' }}" required aria-describedby="emailHelp">{% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                         </div>
                         <div class="mb-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <label for="exampleInputPassword1" class="form-label">Пароль</label>
                                 <small><a href="#" class="link-dark foodplan_green">Забыли пароль?</a></small>
                             </div>
-                            <input type="password" class="form-control" id="password">
+                            <input type="password" class="form-control" id="password" name="password" required>{% for error in form.password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                         </div>
                         <div class="row mb-3">
                             <div class="col-12 col-sm-6 mt-3">

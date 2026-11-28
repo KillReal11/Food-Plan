@@ -5,7 +5,7 @@
     <header>
         <nav class="navbar navbar-expand-md navbar-light fixed-top navbar__opacity">
             <div class="container">
-                <a class="navbar-brand" href="{% url 'index' %}">
+                <a class="navbar-brand" href="{% url 'home' %}">
                     <img src="{% static 'img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse1"
@@ -17,7 +17,7 @@
                         
                         <li class="nav-item align-items-center d-md-flex flex-grow-1 justify-content-end">
                             <button class="btn shadow-none btn-outline-success me-2 foodplan_green foodplan__border_green">Подписка</button>
-                            <a href="{% url 'auth' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Войти</a>
+                            <button class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Войти</button>
                         </li>
                     </ul>
                 </div>
@@ -30,7 +30,7 @@
         <section>
             <div class="container">
                 <div class="card p-3 mb-5 foodplan__shadow">
-                    <a href="#" class="link-secondary fw-light foodplan__backButton">
+                    <a href="{% url 'home' %}" class="link-secondary fw-light foodplan__backButton">
                         <svg xmlns="http://www.w3.org/2000/svg" width="9%" height="9%" fill="currentColor" class="bi bi-arrow-left-circle"
                             viewBox="0 0 16 16">
                             <path fill-rule="evenodd"
@@ -40,30 +40,31 @@
                     <h2 class="text-center"><strong>Авторизация</strong></h2>
                 </div>
                 <div class="card px-5 py-3 d-flex align-items-center foodplan__shadow">
-                    <form>
+                    <form method="post">
+                        {% csrf_token %}
                         <h1 class="mb-4 text-center"><strong>Регистрация</strong></h1>
                         <div class="mb-3">
                             <label for="exampleInputEmail1" class="form-label">Имя</label>
-                            <input type="text" class="form-control" id="name">
+                            <input type="text" class="form-control" id="name" name="name" value="{{ form.name.value|default:'' }}" required>{% for error in form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                         </div>
                         <div class="mb-3">
                             <label for="exampleInputEmail1" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" aria-describedby="emailHelp">
+                            <input type="email" class="form-control" id="email" name="email" value="{{ form.email.value|default:'' }}" required aria-describedby="emailHelp">{% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                         </div>
                         <div class="mb-3">
                             <label for="exampleInputPassword1" class="form-label">Пароль</label>
-                            <input type="password" class="form-control" id="password">
+                            <input type="password" class="form-control" id="password" name="password" required>{% for error in form.password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                         </div>
                         <div class="mb-3">
                             <label for="exampleInputPassword1" class="form-label">Подтверждение пароля</label>
-                            <input type="password" class="form-control" id="PasswordConfirm">
+                            <input type="password" class="form-control" id="PasswordConfirm" name="password_confirm" required>{% for error in form.password_confirm.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                         </div>
                         <div class="row mb-3">
                             <div class="col-12 col-sm-6 mt-3">
                                 <button type="submit" class="btn  shadow-nonew-100 btn-outline-success foodplan_green foodplan__border_green">Регистрация</button>
                             </div>
                             <div class="col-12 col-sm-6 mt-3 d-flex justify-content-center align-items-center">
-                                <small>Уже есть аккаунт? <a href="{% url 'auth' %}" class="link-dark foodplan_green">Войти</a></small>
+                                <small>Уже есть аккаунт? <a href="{% url 'login' %}" class="link-dark foodplan_green">Войти</a></small>
                             </div>
                         </div>
                     </form>
