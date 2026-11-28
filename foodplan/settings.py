@@ -45,6 +45,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.media",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -69,6 +70,10 @@ AUTHENTICATION_BACKENDS = [
     "recipes.backends.EmailOrUsernameBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "lk"
+LOGOUT_REDIRECT_URL = "home"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
